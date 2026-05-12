@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>石勤 | sq-shiqin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #FFFFFF;
+            --bg-secondary: #FAFAFA;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --text-tertiary: #6e6e73;
+            --border: rgba(0, 0, 0, 0.06);
+        }
+        body {
+            font-family: 'Noto Serif SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-inner {
+            max-width: 980px; margin: 0 auto; padding: 0 22px; height: 52px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-logo { font-size: 14px; font-weight: 500; letter-spacing: 0.5px; }
+        .nav-links { display: flex; gap: 32px; }
+        .nav-links a { font-size: 11px; color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text-primary); }
+        .hero { max-width: 980px; margin: 0 auto; padding: 100px 22px 60px; text-align: center; }
+        .hero-image-wrap { margin-bottom: 48px; }
+        .hero-image { width: 220px; height: 220px; border-radius: 50%; object-fit: cover; }
+        .hero-name { margin-bottom: 40px; }
+        .hero-name-cn { font-size: 48px; font-weight: 400; letter-spacing: 12px; margin-bottom: 10px; }
+        .hero-name-en { font-size: 12px; color: var(--text-secondary); letter-spacing: 2px; font-family: 'Inter', sans-serif; }
+        .slogan { margin-bottom: 40px; }
+        .slogan-label { font-size: 9px; color: var(--text-tertiary); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 18px; font-family: 'Inter', sans-serif; }
+        .slogan-words { display: flex; justify-content: center; gap: 36px; }
+        .slogan-word { font-size: 24px; font-weight: 300; letter-spacing: 8px; }
+        .divider { max-width: 980px; margin: 0 auto; padding: 0 22px; }
+        .divider hr { border: none; border-top: 1px solid var(--border); }
+        .about { max-width: 980px; margin: 0 auto; padding: 56px 22px; text-align: center; }
+        .about-label { font-size: 9px; color: var(--text-tertiary); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; font-family: 'Inter', sans-serif; }
+        .about-text { font-size: 15px; color: var(--text-secondary); line-height: 2; font-weight: 300; max-width: 560px; margin: 0 auto; }
+        .philosophy { background: var(--bg-secondary); padding: 64px 22px; }
+        .philosophy-inner { max-width: 980px; margin: 0 auto; }
+        .philosophy-label { font-size: 9px; color: var(--text-tertiary); letter-spacing: 3px; text-transform: uppercase; text-align: center; margin-bottom: 40px; font-family: 'Inter', sans-serif; }
+        .philosophy-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .philosophy-item { background: var(--bg); border-radius: 10px; padding: 28px 16px; text-align: center; border: 1px solid var(--border); }
+        .philosophy-title { font-size: 16px; font-weight: 400; letter-spacing: 3px; margin-bottom: 14px; }
+        .philosophy-desc { font-size: 11px; color: var(--text-tertiary); line-height: 1.8; text-align: center; }
+        .cta-section { padding: 56px 22px; text-align: center; }
+        .cta-label { font-size: 9px; color: var(--text-tertiary); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 24px; font-family: 'Inter', sans-serif; }
+        .cta-buttons { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+        .cta { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: var(--text-primary); color: var(--bg); text-decoration: none; font-size: 12px; font-weight: 500; letter-spacing: 1px; border-radius: 30px; transition: all 0.3s; }
+        .cta:hover { background: #000; transform: translateY(-1px); }
+        .cta-outline { background: transparent; color: var(--text-primary); border: 1px solid var(--border); }
+        .cta-outline:hover { background: var(--bg-secondary); }
+        .footer { text-align: center; padding: 40px 22px; border-top: 1px solid var(--border); }
+        .footer-text { font-size: 11px; color: var(--text-tertiary); letter-spacing: 1px; }
+        @media (max-width: 768px) {
+            .hero-name-cn { font-size: 38px; }
+            .slogan-words { gap: 24px; flex-wrap: wrap; }
+            .slogan-word { font-size: 20px; letter-spacing: 6px; }
+            .philosophy-grid { grid-template-columns: repeat(2, 1fr); }
+            .cta-buttons { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <div class="nav-logo">sq-shiqin</div>
+            <div class="nav-links">
+                <a href="#about">关于</a>
+                <a href="./works.html">作品</a>
+            </div>
+        </div>
+    </nav>
+    <section class="hero" id="about">
+        <div class="hero-image-wrap">
+            <img src="shiqin.jpg" alt="石勤" class="hero-image">
+        </div>
+        <div class="hero-name">
+            <div class="hero-name-cn">石勤</div>
+            <div class="hero-name-en">sq-shiqin</div>
+        </div>
+        <div class="slogan">
+            <div class="slogan-label">Four Principles</div>
+            <div class="slogan-words">
+                <span class="slogan-word">刚毅</span>
+                <span class="slogan-word">锋利</span>
+                <span class="slogan-word">隐忍</span>
+                <span class="slogan-word">从容</span>
+            </div>
+        </div>
+    </section>
+    <div class="divider"><hr></div>
+    <section class="about">
+        <div class="about-label">About</div>
+        <div class="about-text">
+            谋定而后动，知止而有得。<br>
+            在时代的浪潮中，以思考为锚，以行动为帆。
+        </div>
+    </section>
+    <section class="philosophy">
+        <div class="philosophy-inner">
+            <div class="philosophy-label">Philosophy</div>
+            <div class="philosophy-grid">
+                <div class="philosophy-item">
+                    <div class="philosophy-title">逆推思维</div>
+                    <div class="philosophy-desc">以终为始<br>从目标倒推路径<br>谋定而后动</div>
+                </div>
+                <div class="philosophy-item">
+                    <div class="philosophy-title">第一性原理</div>
+                    <div class="philosophy-desc">穿透表象<br>回到本质<br>从根本上解决问题</div>
+                </div>
+                <div class="philosophy-item">
+                    <div class="philosophy-title">做减法</div>
+                    <div class="philosophy-desc">去掉多余<br>保留核心<br>用最小行为推动进展</div>
+                </div>
+                <div class="philosophy-item">
+                    <div class="philosophy-title">矛盾论</div>
+                    <div class="philosophy-desc">抓住主要矛盾<br>透过现象看本质<br>分析问题根源</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="cta-section">
+        <div class="cta-label">Navigate</div>
+        <div class="cta-buttons">
+            <a href="./works.html" class="cta">作品展示</a>
+            <a href="./net/" class="cta cta-outline">长期作品</a>
+            <a href="./tp/" class="cta cta-outline">临时分享</a>
+        </div>
+    </section>
+    <footer class="footer">
+        <div class="footer-text">© 2026 石勤 sq-shiqin · 磐石之志 以勤砺石</div>
+    </footer>
+</body>
+</html>

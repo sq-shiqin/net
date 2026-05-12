@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>长期作品 | sq-shiqin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #FFFFFF;
+            --bg-secondary: #FAFAFA;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --text-tertiary: #6e6e73;
+            --border: rgba(0, 0, 0, 0.06);
+        }
+        body {
+            font-family: 'Noto Serif SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-inner {
+            max-width: 980px; margin: 0 auto; padding: 0 22px; height: 52px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-logo { font-size: 14px; font-weight: 500; letter-spacing: 0.5px; }
+        .nav-links { display: flex; gap: 32px; }
+        .nav-links a { font-size: 11px; color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text-primary); }
+        .header { max-width: 980px; margin: 0 auto; padding: 100px 22px 48px; text-align: center; }
+        .header-title { font-size: 36px; font-weight: 400; letter-spacing: 8px; margin-bottom: 12px; }
+        .header-sub { font-size: 12px; color: var(--text-secondary); letter-spacing: 2px; font-family: 'Inter', sans-serif; }
+        .header-desc { font-size: 14px; color: var(--text-tertiary); margin-top: 16px; line-height: 1.8; }
+        .divider { max-width: 980px; margin: 0 auto; padding: 0 22px; }
+        .divider hr { border: none; border-top: 1px solid var(--border); }
+        .works-section { max-width: 980px; margin: 0 auto; padding: 64px 22px; }
+        .section-label { font-size: 9px; color: var(--text-tertiary); letter-spacing: 3px; text-transform: uppercase; text-align: center; margin-bottom: 48px; font-family: 'Inter', sans-serif; }
+        .works-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .work-card { background: var(--bg-secondary); border-radius: 12px; padding: 48px 24px; text-align: center; border: 1px solid var(--border); transition: all 0.3s; }
+        .work-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04); }
+        .work-icon { width: 56px; height: 56px; border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+        .work-icon svg { width: 24px; height: 24px; color: var(--text-tertiary); }
+        .work-name { font-size: 16px; font-weight: 400; letter-spacing: 3px; margin-bottom: 8px; }
+        .work-desc { font-size: 12px; color: var(--text-tertiary); line-height: 1.6; }
+        .empty-state { background: var(--bg-secondary); border-radius: 12px; padding: 48px 24px; text-align: center; border: 1px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .empty-icon { width: 56px; height: 56px; border: 1px dashed var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+        .empty-icon svg { width: 24px; height: 24px; color: var(--text-tertiary); }
+        .empty-title { font-size: 16px; font-weight: 400; letter-spacing: 3px; margin-bottom: 8px; }
+        .empty-desc { font-size: 12px; color: var(--text-tertiary); }
+        .notice { max-width: 980px; margin: 0 auto; padding: 0 22px 64px; text-align: center; }
+        .notice-text { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 30px; font-size: 12px; color: var(--text-secondary); letter-spacing: 1px; }
+        .notice-dot { width: 6px; height: 6px; background: var(--text-tertiary); border-radius: 50%; }
+        .contact-section { background: var(--bg-secondary); padding: 64px 22px; }
+        .contact-inner { max-width: 980px; margin: 0 auto; text-align: center; }
+        .contact-label { font-size: 9px; color: var(--text-tertiary); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 32px; font-family: 'Inter', sans-serif; }
+        .contact-title { font-size: 24px; font-weight: 400; letter-spacing: 4px; margin-bottom: 16px; }
+        .contact-desc { font-size: 13px; color: var(--text-tertiary); line-height: 1.6; margin-bottom: 32px; }
+        .contact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 600px; margin: 0 auto; }
+        .contact-item { padding: 20px 16px; background: var(--bg); border-radius: 10px; border: 1px solid var(--border); }
+        .contact-item-title { font-size: 12px; font-weight: 500; letter-spacing: 1px; margin-bottom: 6px; }
+        .contact-item-desc { font-size: 11px; color: var(--text-tertiary); }
+        .footer { text-align: center; padding: 48px 22px; border-top: 1px solid var(--border); }
+        .footer-text { font-size: 11px; color: var(--text-tertiary); letter-spacing: 1px; }
+        @media (max-width: 768px) {
+            .works-grid { grid-template-columns: 1fr; }
+            .contact-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <div class="nav-logo">sq-shiqin</div>
+            <div class="nav-links">
+                <a href="../index.html">关于</a>
+                <a href="../works.html">作品</a>
+                <a href="../net/">长期</a>
+                <a href="../tp/">临时</a>
+            </div>
+        </div>
+    </nav>
+    <section class="header">
+        <div class="header-title">长期作品</div>
+        <div class="header-sub">NET</div>
+        <div class="header-desc">永久保留，持续更新</div>
+    </section>
+    <div class="divider"><hr></div>
+    <section class="works-section">
+        <div class="section-label">Works · 作品</div>
+        <div class="works-grid">
+            <div class="work-card">
+                <div class="work-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                </div>
+                <div class="work-name">实用工具</div>
+                <div class="work-desc">方法论<br>工具分享</div>
+            </div>
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                </div>
+                <div class="empty-title">更多作品</div>
+                <div class="empty-desc">持续更新中</div>
+            </div>
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                </div>
+                <div class="empty-title">更多作品</div>
+                <div class="empty-desc">持续更新中</div>
+            </div>
+        </div>
+    </section>
+    <div class="notice">
+        <div class="notice-text">
+            <span class="notice-dot"></span>
+            相关作品等待上传
+        </div>
+    </div>
+    <div class="divider"><hr></div>
+    <section class="contact-section">
+        <div class="contact-inner">
+            <div class="contact-label">Contact</div>
+            <div class="contact-title">联系方式</div>
+            <div class="contact-desc">如需合作或交流，欢迎通过以下方式联系</div>
+            <div class="contact-grid">
+                <div class="contact-item"><div class="contact-item-title">邮箱</div><div class="contact-item-desc">待更新</div></div>
+                <div class="contact-item"><div class="contact-item-title">微信</div><div class="contact-item-desc">待更新</div></div>
+                <div class="contact-item"><div class="contact-item-title">其他</div><div class="contact-item-desc">待更新</div></div>
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+        <div class="footer-text">© 2026 石勤 sq-shiqin · 磐石之志 以勤砺石</div>
+    </footer>
+</body>
+</html>
