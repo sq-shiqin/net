@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>石勤19路棋盘思维推演法</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#faf9f7;--surface:#fff;--text:#1a1a1a;--text2:#555;--border:#e5e3df;
+  --accent:#c96442;--accent2:#3a6ea5;--accent3:#2d4a3e;--radius:14px;--shadow:0 2px 20px rgba(0,0,0,.06);
+  --font-serif:'Noto Serif SC','Georgia',serif;
+  --font-sans:'Inter','Helvetica Neue','PingFang SC',sans-serif;
+  --board-color:#dcb35c;--board-line:#8b6914;--black:#1a1a1a;--white:#f5f0e8;
+}
+[data-theme="dark"]{
+  --bg:#141414;--surface:#1e1e1e;--text:#e8e6e3;--text2:#999;--border:#333;
+  --accent:#e07a5f;--accent2:#5ba4d9;--accent3:#5a8a6e;--shadow:0 2px 20px rgba(0,0,0,.3);
+  --board-color:#2a2a2a;--board-line:#555;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.7;transition:background .4s,color .4s}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* Theme Toggle */
+.theme-toggle{position:fixed;top:20px;right:20px;z-index:999;width:48px;height:48px;border-radius:50%;border:2px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;transition:all .3s;box-shadow:var(--shadow)}
+.theme-toggle:hover{transform:scale(1.1);border-color:var(--accent)}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px;position:relative;overflow:hidden;background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 50%,#1a1a1a 100%)}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 30% 40%,rgba(220,179,92,.1) 0%,transparent 50%),radial-gradient(circle at 70% 60%,rgba(220,179,92,.08) 0%,transparent 50%);animation:heroFloat 20s ease-in-out infinite}
+@keyframes heroFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,20px)}}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:100px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);font-size:13px;color:rgba(255,255,255,.7);margin-bottom:32px;position:relative;backdrop-filter:blur(10px)}
+.hero-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--board-color);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:var(--font-serif);font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;line-height:1.15;letter-spacing:-.02em;margin-bottom:20px;position:relative;color:#fff}
+.hero h1 .highlight{background:linear-gradient(135deg,var(--board-color),#f0d78c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(1rem,2vw,1.25rem);color:rgba(255,255,255,.7);max-width:600px;margin-bottom:40px;position:relative}
+.hero-stats{display:flex;gap:40px;flex-wrap:wrap;justify-content:center;position:relative}
+.stat{text-align:center}
+.stat-num{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,var(--board-color),#f0d78c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-label{font-size:.85rem;color:rgba(255,255,255,.6)}
+.scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(255,255,255,.5);font-size:.8rem;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-8px)}}
+.scroll-hint .arrow{width:24px;height:24px;border-right:2px solid rgba(255,255,255,.5);border-bottom:2px solid rgba(255,255,255,.5);transform:rotate(45deg)}
+
+/* Nav */
+.nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);padding:0 20px}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+.nav-inner::-webkit-scrollbar{display:none}
+.nav a{padding:14px 18px;font-size:.85rem;color:var(--text2);text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s}
+.nav a:hover,.nav a.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* Section */
+.section{max-width:1200px;margin:0 auto;padding:80px 24px}
+.section-label{display:inline-flex;align-items:center;gap:8px;font-size:.75rem;text-transform:uppercase;letter-spacing:.15em;color:var(--accent);font-weight:600;margin-bottom:12px}
+.section-label::before{content:'';width:24px;height:2px;background:var(--accent)}
+.section h2{font-family:var(--font-serif);font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;margin-bottom:16px;line-height:1.3}
+.section-desc{color:var(--text2);max-width:700px;margin-bottom:48px;font-size:1.05rem}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;transition:all .3s;box-shadow:var(--shadow)}
+.card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,.1)}
+
+/* Interactive Board */
+.board-container{display:flex;flex-direction:column;align-items:center;gap:24px}
+.board-wrapper{position:relative;background:var(--board-color);border-radius:12px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.board{display:grid;grid-template-columns:repeat(19,1fr);gap:0;width:min(90vw,570px);height:min(90vw,570px);position:relative}
+.board-line-h{position:absolute;left:0;right:0;height:1px;background:var(--board-line)}
+.board-line-v{position:absolute;top:0;bottom:0;width:1px;background:var(--board-line)}
+.intersection{position:relative;z-index:2;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.intersection:hover::after{content:'';width:60%;height:60%;border-radius:50%;background:rgba(220,179,92,.3);position:absolute}
+.intersection.active::after{content:'';width:70%;height:70%;border-radius:50%;background:var(--accent);position:absolute;animation:placeStone .3s ease-out}
+@keyframes placeStone{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.intersection .stone{width:80%;height:80%;border-radius:50%;position:absolute;transition:all .3s;box-shadow:2px 2px 4px rgba(0,0,0,.3)}
+.stone.black{background:radial-gradient(circle at 35% 35%,#555,#1a1a1a)}
+.stone.white{background:radial-gradient(circle at 35% 35%,#fff,#ddd)}
+
+/* Board Controls */
+.board-controls{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.board-btn{padding:10px 24px;border-radius:100px;border:2px solid var(--border);background:var(--surface);cursor:pointer;font-size:.9rem;font-weight:500;transition:all .2s;color:var(--text)}
+.board-btn:hover,.board-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.board-btn.reset{background:transparent;border-color:var(--accent);color:var(--accent)}
+.board-btn.reset:hover{background:var(--accent);color:#fff}
+
+/* Stats Display */
+.board-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%;max-width:570px}
+.board-stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.board-stat .num{font-size:1.8rem;font-weight:800;color:var(--accent)}
+.board-stat .label{font-size:.8rem;color:var(--text2)}
+
+/* Core Concept */
+.concept-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+.concept-card{position:relative;overflow:hidden}
+.concept-card .icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:20px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.concept-card h3{font-size:1.2rem;margin-bottom:8px}
+.concept-card p{font-size:.9rem;color:var(--text2)}
+
+/* Uses */
+.uses-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px}
+.use-card{position:relative;overflow:hidden;padding:0}
+.use-card .use-header{padding:24px 28px 16px;display:flex;align-items:center;gap:16px}
+.use-card .use-num{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.2rem;flex-shrink:0}
+.use-card h3{font-size:1.15rem}
+.use-card .use-body{padding:0 28px 24px}
+.use-card p{font-size:.9rem;color:var(--text2);margin-bottom:12px}
+.use-card .detail{background:var(--bg);border-radius:8px;padding:16px;margin-top:12px}
+.use-card .detail h4{font-size:.85rem;margin-bottom:8px;color:var(--accent)}
+.use-card .detail ul{list-style:none;padding:0}
+.use-card .detail li{padding:4px 0;padding-left:20px;position:relative;font-size:.85rem;color:var(--text2)}
+.use-card .detail li::before{content:'';position:absolute;left:0;top:12px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+
+/* Mnemonic */
+.mnemonic-box{background:linear-gradient(135deg,rgba(220,179,92,.1),rgba(220,179,92,.05));border:2px solid var(--board-color);border-radius:var(--radius);padding:48px;text-align:center;margin:32px 0}
+.mnemonic-box .quote{font-family:var(--font-serif);font-size:clamp(1.5rem,4vw,2.5rem);font-weight:700;color:var(--board-color);margin-bottom:16px;letter-spacing:.1em}
+.mnemonic-box .explain{font-size:1rem;color:var(--text2);max-width:600px;margin:0 auto}
+
+/* Flow */
+.flow{position:relative;padding-left:40px}
+.flow::before{content:'';position:absolute;left:18px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--accent),var(--accent2))}
+.flow-step{position:relative;margin-bottom:36px}
+.flow-step::before{content:attr(data-step);position:absolute;left:-40px;top:0;width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;box-shadow:0 2px 10px rgba(201,100,66,.3)}
+.flow-step:nth-child(even)::before{background:var(--accent2);box-shadow:0 2px 10px rgba(58,110,165,.3)}
+.flow-step h3{font-size:1.15rem;margin-bottom:8px}
+.flow-step p{color:var(--text2);font-size:.95rem}
+
+/* Hand Map */
+.hand-section{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+@media(max-width:768px){.hand-section{grid-template-columns:1fr}}
+.hand-visual{position:relative;display:flex;justify-content:center}
+.hand-diagram{width:300px;height:400px;background:linear-gradient(135deg,#f5e6d3,#e8d5c0);border-radius:40% 40% 30% 30%;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.1)}
+.hand-point{position:absolute;width:24px;height:24px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#fff;font-weight:700;cursor:pointer;transition:all .3s;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.hand-point:hover{transform:scale(1.3);background:var(--accent2)}
+.hand-point.center{top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;background:var(--board-color)}
+.hand-point.center:hover{transform:translate(-50%,-50%) scale(1.3)}
+.hand-info{padding:20px}
+.hand-info h3{font-family:var(--font-serif);font-size:1.5rem;margin-bottom:16px}
+.hand-info p{color:var(--text2);margin-bottom:12px;font-size:.95rem}
+.hand-info .tip{background:var(--bg);border-radius:8px;padding:16px;border-left:4px solid var(--board-color)}
+
+/* FAQ */
+.faq-item{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;background:var(--surface);transition:box-shadow .3s}
+.faq-item.open{box-shadow:var(--shadow)}
+.faq-q{padding:18px 24px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:1rem;transition:color .2s}
+.faq-q:hover{color:var(--accent)}
+.faq-q .icon{font-size:1.4rem;transition:transform .3s;color:var(--text2)}
+.faq-item.open .faq-q .icon{transform:rotate(45deg);color:var(--accent)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s;padding:0 24px}
+.faq-item.open .faq-a{max-height:300px;padding:0 24px 18px}
+.faq-a p{font-size:.95rem;color:var(--text2);line-height:1.8}
+
+/* Footer */
+.footer{text-align:center;padding:60px 24px;color:var(--text2);font-size:.85rem;border-top:1px solid var(--border);margin-top:40px}
+
+/* Back to top */
+.back-top{position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;background:var(--board-color);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;opacity:0;transform:translateY(20px);transition:all .3s;z-index:99;box-shadow:0 4px 15px rgba(220,179,92,.3)}
+.back-top.show{opacity:1;transform:translateY(0)}
+
+/* Responsive */
+@media(max-width:768px){
+  .section{padding:48px 16px}
+  .concept-grid,.uses-grid{grid-template-columns:1fr}
+  .hero-stats{gap:24px}
+  .nav a{padding:12px 14px;font-size:.8rem}
+  .hand-diagram{width:250px;height:330px}
+}
+</style>
+</head>
+<body>
+
+<!-- Theme Toggle -->
+<button class="theme-toggle" onclick="toggleTheme()" title="切换暗色模式">🌙</button>
+
+<!-- Hero -->
+<section class="hero" id="top">
+  <div class="hero-badge"><span class="dot"></span>思维工具 · 系统推演</div>
+  <h1>石勤<span class="highlight">19路棋盘</span><br>思维推演法</h1>
+  <p class="hero-sub">把围棋盘变成你的思维宫殿——361个交叉点，36个九宫格，一套完整的认知操作系统。</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">361</div><div class="stat-label">交叉点</div></div>
+    <div class="stat"><div class="stat-num">36</div><div class="stat-label">九宫格</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">核心用途</div></div>
+    <div class="stat"><div class="stat-num">∞</div><div class="stat-label">思维空间</div></div>
+  </div>
+  <div class="scroll-hint"><span>向下探索</span><div class="arrow"></div></div>
+</section>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#concept">核心概念</a>
+    <a href="#board">交互棋盘</a>
+    <a href="#uses">五大用途</a>
+    <a href="#mnemonic">记忆口诀</a>
+    <a href="#flow">推演流程</a>
+    <a href="#hand">手掌延伸</a>
+    <a href="#faq">常见问题</a>
+  </div>
+</nav>
+
+<!-- Concept -->
+<section class="section" id="concept">
+  <div class="section-label">Core Concept</div>
+  <h2>核心概念</h2>
+  <p class="section-desc">把系统思维带入二维围棋盘。整个棋盘是一个系统，每个交叉点都是系统的要素。给每一颗棋子赋予独特的身份，将棋子在棋盘上的意义进行具象化。</p>
+  <div class="concept-grid">
+    <div class="card concept-card">
+      <div class="icon">🎯</div>
+      <h3>361 个交叉点</h3>
+      <p>19×19 的围棋盘，每一个交叉点都是一个「按钮」，对应一个三维现实情景的开关。落子即开门，门后是预演好的执行画面。</p>
+    </div>
+    <div class="card concept-card">
+      <div class="icon">📐</div>
+      <h3>36 个九宫格</h3>
+      <p>大九宫格 16 个 + 小九宫格 4 个，每个九宫格都是一个局部系统。横轴代表时间，竖轴代表空间，衔接动作，转化为三维现实情景。</p>
+    </div>
+    <div class="card concept-card">
+      <div class="icon">🧠</div>
+      <h3>右脑推演</h3>
+      <p>不强行记忆坐标点（启动左脑），而是用相对位置进行空间想象（启动右脑）。二维平面是总导航，三维预演是具体执行。</p>
+    </div>
+    <div class="card concept-card">
+      <div class="icon">⚡</div>
+      <h3>动态交互系统</h3>
+      <p>本质是建立自己和大脑的动态交互模拟系统。每个交叉点绑定一个完整意图，扫描时自动触发三维空间想象。</p>
+    </div>
+  </div>
+
+  <!-- Stats Table -->
+  <div class="card" style="margin-top:32px">
+    <h3 style="margin-bottom:16px">棋盘数据统计</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px">
+      <div style="text-align:center;padding:16px;background:var(--bg);border-radius:8px">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--accent)">361</div>
+        <div style="font-size:.8rem;color:var(--text2)">总交叉点</div>
+      </div>
+      <div style="text-align:center;padding:16px;background:var(--bg);border-radius:8px">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--accent)">36</div>
+        <div style="font-size:.8rem;color:var(--text2)">九宫格总数</div>
+      </div>
+      <div style="text-align:center;padding:16px;background:var(--bg);border-radius:8px">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--accent)">16</div>
+        <div style="font-size:.8rem;color:var(--text2)">大九宫格</div>
+      </div>
+      <div style="text-align:center;padding:16px;background:var(--bg);border-radius:8px">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--accent)">4</div>
+        <div style="font-size:.8rem;color:var(--text2)">小九宫格</div>
+      </div>
+      <div style="text-align:center;padding:16px;background:var(--bg);border-radius:8px">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--accent)">16</div>
+        <div style="font-size:.8rem;color:var(--text2)">每个九宫格交叉点</div>
+      </div>
+      <div style="text-align:center;padding:16px;background:var(--bg);border-radius:8px">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--accent)">4+4</div>
+        <div style="font-size:.8rem;color:var(--text2)">每个九宫格线条</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Interactive Board -->
+<section class="section" id="board">
+  <div class="section-label">Interactive Board</div>
+  <h2>交互式 19 路棋盘</h2>
+  <p class="section-desc">点击交叉点落子，体验棋盘推演。每个落点都代表一个思维节点，黑白棋子代表正反两面。</p>
+  <div class="board-container">
+    <div class="board-controls">
+      <button class="board-btn active" onclick="setMode('black')" id="btn-black">⚫ 黑子</button>
+      <button class="board-btn" onclick="setMode('white')" id="btn-white">⚪ 白子</button>
+      <button class="board-btn reset" onclick="resetBoard()">🔄 重置</button>
+    </div>
+    <div class="board-stats">
+      <div class="board-stat"><div class="num" id="black-count">0</div><div class="label">黑子数量</div></div>
+      <div class="board-stat"><div class="num" id="white-count">0</div><div class="label">白子数量</div></div>
+      <div class="board-stat"><div class="num" id="total-count">0</div><div class="label">总落子数</div></div>
+    </div>
+    <div class="board-wrapper">
+      <div class="board" id="board-grid"></div>
+    </div>
+    <div class="card" style="max-width:570px;width:100%">
+      <p style="font-size:.85rem;color:var(--text2);text-align:center">💡 <strong>提示</strong>：每个交叉点代表一个思维节点。黑子 = 正面/优势/机遇，白子 = 反面/风险/挑战。在脑海中为每个落子赋予具体含义。</p>
+    </div>
+  </div>
+</section>
+
+<!-- Five Uses -->
+<section class="section" id="uses">
+  <div class="section-label">Five Applications</div>
+  <h2>五大核心用途</h2>
+  <p class="section-desc">从待办事项到知识体系，从正推逆推到人际关系，19路棋盘是一套完整的认知操作系统。</p>
+  <div class="uses-grid">
+    <!-- Use 1 -->
+    <div class="card use-card">
+      <div class="use-header">
+        <div class="use-num">1</div>
+        <h3>九点待办事项记忆法</h3>
+      </div>
+      <div class="use-body">
+        <p>用九宫格的九个点作为静态记忆存储的总开关。每个点代表一个完整意图，展开三维空间的情景转化进行预演。</p>
+        <div class="detail">
+          <h4>核心要点</h4>
+          <ul>
+            <li>选用 19×19 围棋盘作为记忆宫殿</li>
+            <li>9 个核心点：中元点 + 四角点 + 四边点</li>
+            <li>隐含时间线：第一行早上、第二行中午、第三行晚上</li>
+            <li>每个点代表一个完整意图，不是细节步骤</li>
+            <li>扫描每个点时自动触发三维空间想象</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- Use 2 -->
+    <div class="card use-card">
+      <div class="use-header">
+        <div class="use-num">2</div>
+        <h3>快速学习新知识</h3>
+      </div>
+      <div class="use-body">
+        <p>以某个知识的大纲对应每个节点，快速建立联系，构建思维导图式的知识网络。</p>
+        <div class="detail">
+          <h4>核心要点</h4>
+          <ul>
+            <li>大纲的每个章节对应棋盘节点</li>
+            <li>节点间的连线代表知识关联</li>
+            <li>快速建立知识间的系统性联系</li>
+            <li>适合学习新领域、新技能</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- Use 3 -->
+    <div class="card use-card">
+      <div class="use-header">
+        <div class="use-num">3</div>
+        <h3>构建知识体系</h3>
+      </div>
+      <div class="use-body">
+        <p>以九个节点对应知识库的根目录、二级目录、三级目录，到了具体文件以 9 为分组轮播。</p>
+        <div class="detail">
+          <h4>核心要点</h4>
+          <ul>
+            <li>根目录 → 9 个一级节点</li>
+            <li>二级目录 → 每个一级节点展开 9 个子节点</li>
+            <li>三级目录 → 继续展开，层层递进</li>
+            <li>具体文件以 9 为单位分组轮播</li>
+            <li>与电子知识库（如 Obsidian）深度绑定</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- Use 4 -->
+    <div class="card use-card">
+      <div class="use-header">
+        <div class="use-num">4</div>
+        <h3>多维度分析事物</h3>
+      </div>
+      <div class="use-body">
+        <p>黑白棋子代表正反阴阳。九个点代表九个不同维度，正中心为事物核心本质，其他点四散展开。</p>
+        <div class="detail">
+          <h4>5W2H 分析维度</h4>
+          <ul>
+            <li>中心：事物核心本质</li>
+            <li>时间（When）</li>
+            <li>地点（Where）</li>
+            <li>原因（Why）</li>
+            <li>人物关系（Who）</li>
+            <li>展开步骤（What）</li>
+            <li>实施细节（How）</li>
+            <li>成本核算（How much）</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- Use 5 -->
+    <div class="card use-card">
+      <div class="use-header">
+        <div class="use-num">5</div>
+        <h3>人际关系推演图</h3>
+      </div>
+      <div class="use-body">
+        <p>在脑图中构建人际关系图，正中间为核心人物，周围八个点各代表一个人物，在脑海中进行推演模拟。</p>
+        <div class="detail">
+          <h4>核心要点</h4>
+          <ul>
+            <li>中心点 = 核心人物（自己或关键人）</li>
+            <li>周围 8 点 = 8 个重要关系人</li>
+            <li>连线代表关系强度和类型</li>
+            <li>黑子 = 正面关系，白子 = 需修复关系</li>
+            <li>在脑海中模拟互动场景</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- Bonus: 正推逆推 -->
+    <div class="card use-card">
+      <div class="use-header">
+        <div class="use-num">+</div>
+        <h3>正推逆推思维推演</h3>
+      </div>
+      <div class="use-body">
+        <p>结合正向推演（从现状到目标）和逆向推演（从目标倒推），在棋盘上模拟完整的决策路径。</p>
+        <div class="detail">
+          <h4>核心要点</h4>
+          <ul>
+            <li>正推：从起点出发，逐步展开可能性</li>
+            <li>逆推：从目标倒推，找到关键路径</li>
+            <li>黑白子交替，模拟攻防博弈</li>
+            <li>每一步都绑定具体情景和行动</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Mnemonic -->
+<section class="section" id="mnemonic">
+  <div class="section-label">Memory Formula</div>
+  <h2>记忆口诀</h2>
+  <p class="section-desc">每天睡前和早起，在脑海中扫描九个点，强化记忆，刷新大脑缓存。</p>
+  <div class="mnemonic-box">
+    <div class="quote">摆 · 顺 · 能 · 做 · 就 · 拿 · 掉</div>
+    <div class="explain">
+      <strong>摆</strong>——睡前和早起，在脑海中扫描 9 个点<br>
+      <strong>顺</strong>——把今天最重要的事情放在 9 个点上<br>
+      <strong>能</strong>——根据每个点进行强关联，推演三维执行过程<br>
+      <strong>做</strong>——执行时，落子即开门，进入预演画面<br>
+      <strong>就</strong>——完成后，感受认知放松和缓存刷新<br>
+      <strong>拿</strong>——把做好的事项从棋盘上拿掉<br>
+      <strong>掉</strong>——腾出空间，迎接下一个意图
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:32px">
+    <h3 style="margin-bottom:16px">每日推演流程</h3>
+    <div class="flow">
+      <div class="flow-step" data-step="1">
+        <h3>睡前扫描</h3>
+        <p>躺在床上，闭眼，在脑海中浮现 19 路棋盘，扫描 9 个核心点，回顾今天的完成情况。</p>
+      </div>
+      <div class="flow-step" data-step="2">
+        <h3>早起部署</h3>
+        <p>清醒后，把今天最重要、必须完成的事情放在 9 个点上，为每个点绑定完整意图。</p>
+      </div>
+      <div class="flow-step" data-step="3">
+        <h3>强关联推演</h3>
+        <p>扫描每个点时，自动联想、预想、推演出实现该意图所需的时间、空间、场景、方式及详细过程。</p>
+      </div>
+      <div class="flow-step" data-step="4">
+        <h3>执行落子</h3>
+        <p>执行时，脑海中「落子」—— 等于按下按钮，门打开，预演好的三维现实情景画面展开。</p>
+      </div>
+      <div class="flow-step" data-step="5">
+        <h3>完成拿掉</h3>
+        <p>做完一件事，从棋盘上拿掉该棋子，腾出空间，刷新认知缓存。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Flow -->
+<section class="section" id="flow">
+  <div class="section-label">Thinking Flow</div>
+  <h2>二维到三维的转化</h2>
+  <p class="section-desc">棋盘上的每个交叉点，都是一个从二维平面到三维现实的转换按钮。</p>
+  <div class="styles-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">
+    <div class="card" style="border-left:4px solid var(--accent)">
+      <h3 style="margin-bottom:12px">二维平面层</h3>
+      <p style="font-size:.9rem;color:var(--text2);margin-bottom:16px">19×19 的围棋盘 = 总导航、总地图</p>
+      <div style="background:var(--bg);border-radius:8px;padding:16px">
+        <p style="font-size:.85rem;color:var(--text2)">• 361 个交叉点 = 361 个按钮<br>• 9 个核心点 = 9 个总开关<br>• 相对位置记忆，启动右脑<br>• 不强行记忆坐标</p>
+      </div>
+    </div>
+    <div class="card" style="border-left:4px solid var(--accent2)">
+      <h3 style="margin-bottom:12px">三维现实层</h3>
+      <p style="font-size:.9rem;color:var(--text2);margin-bottom:16px">每个按钮展开 = 具体情景画面</p>
+      <div style="background:var(--bg);border-radius:8px;padding:16px">
+        <p style="font-size:.85rem;color:var(--text2)">• 横轴 = 时间维度<br>• 纵轴 = 空间维度<br>• 衔接 = 具体动作<br>• 落子 = 开门 = 进入预演画面</p>
+      </div>
+    </div>
+    <div class="card" style="border-left:4px solid var(--board-color)">
+      <h3 style="margin-bottom:12px">转化机制</h3>
+      <p style="font-size:.9rem;color:var(--text2);margin-bottom:16px">扫描 → 触发 → 展开 → 定格</p>
+      <div style="background:var(--bg);border-radius:8px;padding:16px">
+        <p style="font-size:.85rem;color:var(--text2)">• 扫描棋盘点位<br>• 触发三维空间想象<br>• 展开完整执行画面<br>• 定格成视频或照片绑定</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Hand Extension -->
+<section class="section" id="hand">
+  <div class="section-label">Hand Integration</div>
+  <h2>手掌延伸思考</h2>
+  <p class="section-desc">围棋盘是脑海中的推演工具，手掌是现实中的触觉锚点。两者能否结合？</p>
+  <div class="hand-section">
+    <div class="hand-visual">
+      <div class="hand-diagram">
+        <div class="hand-point center" title="核心意图">中</div>
+        <div class="hand-point" style="top:15%;left:30%" title="时间维度">1</div>
+        <div class="hand-point" style="top:15%;left:70%" title="空间维度">2</div>
+        <div class="hand-point" style="top:35%;left:15%" title="人物关系">3</div>
+        <div class="hand-point" style="top:35%;left:85%" title="资源条件">4</div>
+        <div class="hand-point" style="top:55%;left:20%" title="执行步骤">5</div>
+        <div class="hand-point" style="top:55%;left:80%" title="风险预判">6</div>
+        <div class="hand-point" style="top:75%;left:35%" title="成本核算">7</div>
+        <div class="hand-point" style="top:75%;left:65%" title="时间节点">8</div>
+      </div>
+    </div>
+    <div class="hand-info">
+      <h3>手掌 × 棋盘的结合可能</h3>
+      <p>手掌上的关节和线条，天然形成一个网络结构。每个关节可以作为一个触觉锚点，对应棋盘上的思维节点。</p>
+      <p>核心思路：<strong>用手指关节作为现实世界的「落子点」</strong>，触碰关节时触发脑海中对应的三维预演。</p>
+      <div class="tip">
+        <strong>💡 延伸思考</strong><br>
+        手掌是随身携带的「棋盘」，不依赖任何外部工具。走路、开会、排队时，都可以用手指关节进行快速推演。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Key Insight -->
+<section class="section">
+  <div class="section-label">Key Insight</div>
+  <h2>核心洞察</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">
+    <div class="card" style="border-top:4px solid var(--accent)">
+      <h3 style="margin-bottom:12px">不要强行记忆坐标</h3>
+      <p style="font-size:.9rem;color:var(--text2)">每个坐标点的话就会启动左脑。只需要记住相对位置，进行大概的空间想象，这样启动的是右脑。</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--accent2)">
+      <h3 style="margin-bottom:12px">二维是开关，三维是画面</h3>
+      <p style="font-size:.9rem;color:var(--text2)">二维平面棋盘是总导航、总地图。每个交叉点是一个按钮，按下去就跳转到具体的三维画面。</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--board-color)">
+      <h3 style="margin-bottom:12px">强化海马体 + 前额皮层</h3>
+      <p style="font-size:.9rem;color:var(--text2)">不写在纸上，不借助外部工具，强行在脑海中推演，锻炼海马体和前额皮层，提高认知能力和思维能力。</p>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="section-label">FAQ</div>
+  <h2>常见问题</h2>
+  <div style="margin-top:24px">
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">为什么用围棋盘而不是其他工具？<span class="icon">+</span></div>
+      <div class="faq-a"><p>围棋盘是二维平面的极致抽象——361个均匀分布的交叉点，天然形成网格结构，适合做思维导航。而且围棋本身就有「落子即决策」的隐喻，和思维推演高度契合。</p></div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">必须用 19 路吗？可以用 13 路或 7 路吗？<span class="icon">+</span></div>
+      <div class="faq-a"><p>可以。7 路有 4 个九宫格，适合简单任务；13 路有 16 个九宫格，适合中等复杂度；19 路有 36 个九宫格，适合复杂系统推演。根据任务复杂度选择。</p></div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">真的不能写在纸上吗？<span class="icon">+</span></div>
+      <div class="faq-a"><p>核心原则是「在脑海中推演」，因为写在纸上会启动左脑的逻辑分析模式，而空间想象启动的是右脑的直觉模式。但初期学习时可以先画在纸上辅助理解，熟练后逐渐转移到纯脑内推演。</p></div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">每天需要花多少时间？<span class="icon">+</span></div>
+      <div class="faq-a"><p>早晚各 5-10 分钟即可。睡前扫描回顾，早起部署推演。关键不是时间长短，而是每天坚持，形成习惯后，推演速度会越来越快。</p></div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">和思维导图有什么区别？<span class="icon">+</span></div>
+      <div class="faq-a"><p>思维导图是「画出来」的，依赖外部工具；19路棋盘是「想出来」的，纯脑内推演。思维导图是静态的树状结构；棋盘推演是动态的、可交互的、可模拟执行的。两者可以结合使用。</p></div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">手掌结合的具体方法是什么？<span class="icon">+</span></div>
+      <div class="faq-a"><p>目前是一个延伸思考方向。核心思路是用手指关节作为触觉锚点——触碰不同关节时，触发脑海中对应的三维预演。具体方法还在探索中，欢迎实践后反馈。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Summary -->
+<section class="section" style="text-align:center">
+  <div style="max-width:700px;margin:0 auto;padding:48px;background:linear-gradient(135deg,rgba(220,179,92,.08),rgba(220,179,92,.03));border-radius:var(--radius);border:2px solid var(--board-color)">
+    <p style="font-family:var(--font-serif);font-size:clamp(1.2rem,3vw,1.6rem);font-weight:600;line-height:1.6;margin-bottom:12px">361 个交叉点，36 个九宫格，<br>一套完整的认知操作系统。<br>在脑海中落子，在现实中开花。</p>
+    <p style="color:var(--text2);font-size:.85rem">—— 石勤19路棋盘思维推演法</p>
+  </div>
+</section>
+
+<!-- Footer -->
+<div class="footer">
+  <p>石勤19路棋盘思维推演法 · 交互式教学网页</p>
+  <p style="margin-top:8px">📊 数据源：石勤19路棋盘思维推演法.md · 📌 假设前提：围棋基础知识已具备</p>
+</div>
+
+<!-- Back to top -->
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+// Theme toggle
+function toggleTheme(){
+  const html=document.documentElement;
+  const btn=document.querySelector('.theme-toggle');
+  if(html.dataset.theme==='light'){html.dataset.theme='dark';btn.textContent='☀️'}
+  else{html.dataset.theme='light';btn.textContent='🌙'}
+}
+
+// Board
+let currentMode='black';
+let boardState={};
+
+function initBoard(){
+  const board=document.getElementById('board-grid');
+  board.innerHTML='';
+  // Draw lines
+  for(let i=0;i<19;i++){
+    const hLine=document.createElement('div');
+    hLine.className='board-line-h';
+    hLine.style.top=`${(i/18)*100}%`;
+    board.appendChild(hLine);
+    const vLine=document.createElement('div');
+    vLine.className='board-line-v';
+    vLine.style.left=`${(i/18)*100}%`;
+    board.appendChild(vLine);
+  }
+  // Draw intersections
+  for(let y=0;y<19;y++){
+    for(let x=0;x<19;x++){
+      const inter=document.createElement('div');
+      inter.className='intersection';
+      inter.dataset.x=x;
+      inter.dataset.y=y;
+      inter.addEventListener('click',()=>placeStone(x,y,inter));
+      board.appendChild(inter);
+    }
+  }
+  // Star points
+  const stars=[[3,3],[3,9],[3,15],[9,3],[9,9],[9,15],[15,3],[15,9],[15,15]];
+  stars.forEach(([x,y])=>{
+    const idx=y*19+x;
+    const el=board.children[idx];
+    if(el){
+      const dot=document.createElement('div');
+      dot.style.cssText='position:absolute;width:8px;height:8px;border-radius:50%;background:var(--board-line);pointer-events:none;';
+      el.appendChild(dot);
+    }
+  });
+}
+
+function placeStone(x,y,el){
+  const key=`${x},${y}`;
+  if(boardState[key]){
+    // Remove stone
+    const stone=el.querySelector('.stone');
+    if(stone)stone.remove();
+    el.classList.remove('active');
+    delete boardState[key];
+  } else {
+    // Place stone
+    const stone=document.createElement('div');
+    stone.className=`stone ${currentMode}`;
+    el.appendChild(stone);
+    el.classList.add('active');
+    boardState[key]=currentMode;
+  }
+  updateStats();
+}
+
+function setMode(mode){
+  currentMode=mode;
+  document.getElementById('btn-black').classList.toggle('active',mode==='black');
+  document.getElementById('btn-white').classList.toggle('active',mode==='white');
+}
+
+function resetBoard(){
+  boardState={};
+  document.querySelectorAll('.intersection').forEach(el=>{
+    el.classList.remove('active');
+    const stone=el.querySelector('.stone');
+    if(stone)stone.remove();
+  });
+  updateStats();
+}
+
+function updateStats(){
+  const values=Object.values(boardState);
+  const black=values.filter(v=>v==='black').length;
+  const white=values.filter(v=>v==='white').length;
+  document.getElementById('black-count').textContent=black;
+  document.getElementById('white-count').textContent=white;
+  document.getElementById('total-count').textContent=black+white;
+}
+
+// FAQ
+function toggleFaq(el){
+  const wasOpen=el.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+  if(!wasOpen)el.classList.add('open');
+}
+
+// Back to top
+window.addEventListener('scroll',()=>{
+  const btn=document.getElementById('backTop');
+  if(window.scrollY>600)btn.classList.add('show');
+  else btn.classList.remove('show');
+});
+
+// Nav active state
+const sections=document.querySelectorAll('.section[id]');
+const navLinks=document.querySelectorAll('.nav a');
+window.addEventListener('scroll',()=>{
+  let current='';
+  sections.forEach(s=>{
+    const top=s.offsetTop-100;
+    if(window.scrollY>=top)current=s.id;
+  });
+  navLinks.forEach(a=>{
+    a.classList.remove('active');
+    if(a.getAttribute('href')==='#'+current)a.classList.add('active');
+  });
+});
+
+// Intersection Observer for fade-in
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.style.opacity='1';
+      e.target.style.transform='translateY(0)';
+    }
+  });
+},{threshold:0.1});
+document.querySelectorAll('.card,.concept-card,.use-card,.flow-step,.hand-point').forEach(el=>{
+  el.style.opacity='0';
+  el.style.transform='translateY(20px)';
+  el.style.transition='opacity .6s ease,transform .6s ease';
+  observer.observe(el);
+});
+
+// Init
+initBoard();
+</script>
+</body>
+</html>
